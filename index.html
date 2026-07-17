@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Domus Studio — потолочные решения</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#"><span class="brand-mark">D</span><span class="brand-name">DOMUS <i>STUDIO</i></span></a>
+      <div class="project-name"><input id="projectName" value="Квартира · Гостиная" aria-label="Название проекта" /></div>
+      <div class="top-actions">
+        <span id="saveState" class="save-state">● Черновик</span>
+        <button class="button ghost" id="newProject">+ Новый</button>
+        <button class="button primary" id="saveProject">Сохранить</button>
+      </div>
+    </header>
+
+    <main class="app-shell">
+      <aside class="left-panel">
+        <section class="panel-section">
+          <p class="eyebrow">РАЗДЕЛЫ ПРОЕКТА</p>
+          <nav class="nav-list">
+            <button class="nav-item active" data-view="drawing"><span>⌗</span> План помещения</button>
+            <button class="nav-item" data-view="materials"><span>▧</span> Материалы</button>
+            <button class="nav-item" data-view="catalog"><span>▦</span> Каталог систем</button>
+            <button class="nav-item" data-view="estimate"><span>₽</span> Смета</button>
+            <button class="nav-item" data-view="measure"><span>⌬</span> Замерный лист</button>
+            <button class="nav-item" data-view="check"><span>✓</span> Проверка</button>
+            <button class="nav-item" data-view="client"><span>◉</span> Клиент</button>
+          </nav>
+        </section>
+        <section class="panel-section tool-section" id="drawingTools">
+          <p class="eyebrow">ИНСТРУМЕНТЫ</p>
+          <button class="tool active" id="selectTool">↖ Выделение и перемещение</button>
+          <button class="tool" id="addPointTool">＋ Добавить вершину</button>
+          <button class="tool" data-object-tool="spot">● Добавить светильник</button>
+          <button class="tool" data-object-tool="chandelier">✦ Добавить люстру</button>
+          <button class="tool" data-object-tool="pipe">◌ Добавить обход трубы</button>
+          <button class="tool" data-object-tool="light">━ Добавить световую точку</button>
+          <button class="tool" data-object-tool="vent">▣ Вентиляция / люк</button>
+          <button class="tool" data-object-tool="cornice">⌐ Скрытый карниз</button>
+          <button class="tool" data-object-tool="track">═ Трековая точка</button>
+          <button class="tool" data-object-tool="separator">║ Разделитель полотен</button>
+          <button class="tool" id="deletePoint">⌫ Удалить выбранную</button>
+          <button class="tool" id="resetPlan">↺ Демонстрационный план</button>
+          <p class="hint">Перетаскивайте точки. В режиме добавления нажмите на линию контура.</p>
+        </section>
+        <section class="panel-section tool-section" id="templatesTools"><p class="eyebrow">БЫСТРЫЕ ФОРМЫ</p><div class="template-buttons"><button data-room-template="rectangle">Прямоугольник</button><button data-room-template="lshape">Г-образная</button><button data-room-template="ushape">П-образная</button><button data-room-template="bay">Эркер</button><button data-room-template="column">Колонна</button></div></section>
+        <section class="panel-section saved-projects">
+          <div class="section-heading"><p class="eyebrow">СОХРАНЁННЫЕ ПРОЕКТЫ</p><button id="clearSaved" title="Очистить список">×</button></div>
+          <div id="savedList" class="saved-list"></div>
+          <div class="backup-actions"><button id="exportProject">⇩ Резервная копия</button><label>⇧ Импорт<input id="importProject" type="file" accept="application/json" /></label></div>
+        </section>
+      </aside>
+
+      <section class="workspace" id="drawingView">
+        <div class="workspace-header">
+          <div><h1>План помещения</h1><p>Укажите контур помещения и размеры стен</p></div>
+          <div class="zoom-controls"><button id="zoomOut">−</button><span id="zoomText">100%</span><button id="zoomIn">+</button><button id="fitPlan" title="Вписать план">⛶</button></div>
+        </div>
+        <div class="canvas-wrap"><canvas id="planCanvas" width="900" height="620"></canvas><div id="canvasTip" class="canvas-tip">Тяните за маркеры, чтобы изменить форму комнаты</div></div>
+        <div class="validation" id="validation"></div>
+        <article class="measurement-card">
+          <div class="measurement-head"><div><h2>Производственный замер</h2><p>Основной способ — стороны и внутренние углы. Для нестандартной геометрии используйте диагонали.</p></div><div class="mode-switch"><button id="anglesMode" class="active">По углам</button><button id="triangulationMode">Триангуляция</button></div></div>
+          <div id="anglesPanel"><div id="angleMeasurements" class="measurements-table"></div><p class="hint">Измените значения и примените замер. Если контур не замыкается, приложение покажет расхождение.</p><button id="applyAngles" class="button primary">Применить размеры и углы</button></div>
+          <div id="triangulationPanel" class="hidden"><p class="triangulation-copy">Триангуляция нужна для колонн, ниш, эркеров, сложных многоугольников и помещений с неточными углами. Укажите диагонали между отмеченными вершинами — они будут проверяться вместе с контуром.</p><div class="diagonal-form"><label>От вершины<select id="diagonalFrom"></select></label><label>До вершины<select id="diagonalTo"></select></label><label>Диагональ, м<input id="diagonalLength" type="number" min="0.01" step="0.01" value="5" /></label><button id="addDiagonal" class="button">Добавить</button></div><div id="diagonalList" class="diagonal-list"></div></div>
+          <div class="objects-manager"><div class="objects-heading"><h3>Объекты на плане</h3><span id="objectsSummary"></span></div><div id="planObjectsList" class="plan-objects-list"></div></div>
+        </article>
+      </section>
+
+      <section class="workspace hidden" id="materialsView">
+        <div class="workspace-header"><div><h1>Материалы и комплектация</h1><p>Выберите параметры потолка — смета обновится автоматически</p></div></div>
+        <div class="materials-grid">
+          <article class="card wide"><h2>Полотно</h2><div class="form-grid">
+            <label>Тип полотна<select id="canvasType"><option value="mat">Матовое ПВХ</option><option value="satin">Сатиновое ПВХ</option><option value="gloss">Глянцевое ПВХ</option><option value="translucent">Светопрозрачное ПВХ</option><option value="acoustic">Акустическое перфорированное ПВХ</option><option value="fabric">Тканевое полиэстеровое</option></select></label>
+            <label>Цвет<select id="canvasColor"><option>Белый</option><option>Тёплый белый</option><option>Серый</option><option>Чёрный</option></select></label>
+            <label>Цена, ₽/м²<input id="canvasPrice" type="number" min="0" value="690" /></label>
+            <label>Запас / усадка, %<input id="reserve" type="number" min="0" max="30" step="0.5" value="7" /></label>
+          </div></article>
+          <article class="card"><h2>Профиль</h2><div class="form-grid one"><label>Тип<select id="profileType"><option>Стандартный ПВХ</option><option>Алюминиевый</option><option>Теневой</option><option>Парящий</option><option>Световая система</option><option>Карнизный</option><option>Трековая система</option><option>Многоуровневый</option></select></label><label>Цена, ₽/п.м.<input id="profilePrice" type="number" min="0" value="240" /></label></div></article>
+          <article class="card"><h2>Монтаж</h2><div class="form-grid one"><label>Монтаж, ₽/м²<input id="installPrice" type="number" min="0" value="550" /></label><label>Наценка, %<input id="markup" type="number" min="0" value="20" /></label></div></article>
+          <article class="card wide"><h2>Освещение и доп. работы</h2><div class="form-grid"><label>Точечные светильники<input id="spots" type="number" min="0" value="6" /></label><label>Цена одного, ₽<input id="spotPrice" type="number" min="0" value="850" /></label><label>Световая линия, м<input id="lightLine" type="number" min="0" step="0.1" value="0" /></label><label>Цена линии, ₽/м<input id="lightLinePrice" type="number" min="0" value="2100" /></label><label>Люстра / закладная, ₽<input id="chandelierPrice" type="number" min="0" value="1200" /></label><label>Обход трубы, ₽<input id="pipePrice" type="number" min="0" value="650" /></label><label>Световая точка, ₽<input id="lightPointPrice" type="number" min="0" value="400" /></label><div class="object-price-note"><span>Объекты на плане</span><strong id="objectsPriceSummary">—</strong></div></div><p id="lightingAdvice" class="hint info"></p></article>
+        </div>
+      </section>
+
+      <section class="workspace hidden" id="catalogView">
+        <div class="workspace-header"><div><h1>Каталог систем</h1><p>Базовый справочник. Цены и состав можно менять под ваших поставщиков.</p></div><input id="catalogSearch" class="catalog-search" placeholder="Поиск по названию или артикулу" /></div>
+        <div id="catalogFilters" class="catalog-filters"></div><div id="catalogGrid" class="catalog-grid"></div>
+      </section>
+
+      <section class="workspace hidden" id="estimateView">
+        <div class="workspace-header"><div><h1>Смета</h1><p>Предварительное коммерческое предложение</p></div><div class="doc-actions"><button id="quoteEconomy" class="button">Эконом</button><button id="quoteStandard" class="button">Стандарт</button><button id="quoteShadow" class="button">Теневой</button><button id="quoteLight" class="button">Световой</button><button id="printEstimate" class="button primary">⎙ Печать / PDF</button></div></div>
+        <article class="estimate-paper" id="estimatePaper"><div class="estimate-title"><div><p class="logo-print">ПОТОЛОК PRO</p><h2 id="estimateProject">Квартира · Гостиная</h2></div><p id="estimateDate"></p></div><div class="estimate-client"><strong>Клиент:</strong> <span id="estimateClient">Не указан</span><span id="estimatePhone"></span></div><table><thead><tr><th>Наименование</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr></thead><tbody id="estimateRows"></tbody><tfoot id="estimateTotal"></tfoot></table><p class="estimate-note">Расчёт предварительный. Итоговая стоимость уточняется после контрольного замера.</p></article>
+      </section>
+
+      <section class="workspace hidden" id="checkView"><div class="workspace-header"><div><h1>Проверка перед производством</h1><p>Контроль геометрии, обязательных данных и комплектации</p></div><button id="runPreflight" class="button primary">Обновить проверку</button></div><article class="preflight-card"><div id="preflightSummary" class="preflight-summary"></div><div id="preflightList" class="preflight-list"></div></article></section>
+
+      <section class="workspace hidden" id="measureView">
+        <div class="workspace-header"><div><h1>Замерный лист</h1><p>Документ для передачи контура и контрольных размеров на производство</p></div><div class="doc-actions"><button id="exportDxf" class="button">⇩ Экспорт DXF</button><button id="printMeasure" class="button primary">⎙ Печать / PDF</button></div></div>
+        <article class="measure-paper" id="measurePaper">
+          <div class="measure-paper-head"><div><p class="logo-print">ПОТОЛОК PRO</p><h2>Замерный лист натяжного потолка</h2></div><div><strong id="measureProjectName"></strong><span id="measureCreated"></span></div></div>
+          <div class="measure-meta"><div><span>Клиент</span><strong id="measureClient">Не указан</strong></div><div><span>Адрес</span><strong id="measureAddress">Не указан</strong></div><div><span>Материал</span><strong id="measureMaterial">—</strong></div><div><span>Площадь / периметр</span><strong id="measureMetrics">—</strong></div></div>
+          <div class="measure-layout"><div><h3>Схема контура</h3><canvas id="measureCanvas" width="650" height="450"></canvas><p class="measure-caption">Вершины отмечены по часовой стрелке. Все размеры указаны в метрах.</p></div><div><h3>Стороны и углы</h3><table class="measure-table"><thead><tr><th>Участок</th><th>Длина</th><th>Угол</th></tr></thead><tbody id="measureSideRows"></tbody></table><h3 class="diagonal-heading">Контрольные диагонали</h3><table class="measure-table"><thead><tr><th>Диагональ</th><th>Размер</th><th>Статус</th></tr></thead><tbody id="measureDiagonalRows"></tbody></table><h3 class="diagonal-heading">Объекты на плане</h3><table class="measure-table"><thead><tr><th>Тип</th><th>Координаты</th></tr></thead><tbody id="measureObjectRows"></tbody></table></div></div>
+          <div class="measure-signatures"><div>Замерщик: ____________________</div><div>Дата: ____________________</div><div>Подтверждение клиента: ____________________</div></div>
+        </article>
+      </section>
+
+      <section class="workspace hidden" id="clientView"><div class="workspace-header"><div><h1>Клиент и объект</h1><p>Контактные данные сохраняются вместе с проектом</p></div></div><article class="card client-card"><div class="form-grid"><label>Имя клиента<input id="clientName" placeholder="Например, Анна Смирнова" /></label><label>Телефон<input id="clientPhone" placeholder="+7 (___) ___-__-__" /></label><label class="span-2">Адрес объекта<input id="clientAddress" placeholder="Город, улица, дом, квартира" /></label><label class="span-2">Комментарий<textarea id="clientNote" placeholder="Особенности помещения, пожелания клиента"></textarea></label></div></article><article class="card company-card"><h2>Компания и роли</h2><div class="company-info"><div><span>Компания</span><strong>Domus Studio</strong></div><div><span>Директор</span><strong>Дмитрий · +7 903 444 6559</strong></div></div><div class="roles"><span>Замерщик</span><span>Сборщик</span><span>Директор</span></div></article></section>
+
+      <aside class="right-panel">
+        <section><p class="eyebrow">ПАРАМЕТРЫ ПОМЕЩЕНИЯ</p><div class="metric-list"><div><span>Площадь</span><strong id="areaValue">0,00 м²</strong></div><div><span>Периметр</span><strong id="perimeterValue">0,00 м</strong></div><div><span>Вершин</span><strong id="pointsValue">0</strong></div></div></section>
+        <section><p class="eyebrow">БЫСТРЫЙ РАСЧЁТ</p><div class="quick-total"><span>Итого</span><strong id="totalValue">0 ₽</strong><small>включая материалы и монтаж</small></div><button class="button primary full" id="goEstimate">Открыть смету</button></section>
+        <section><p class="eyebrow">ПРОВЕРКА ЧЕРТЕЖА</p><ul class="check-list" id="checkList"></ul></section>
+      </aside>
+    </main>
+    <div id="toast" class="toast"></div>
+    <script src="app.js"></script>
+  </body>
+</html>
