@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Domus Studio — потолочные решения</title>
+  <title>Domus Studio — потолочные решения</title><link rel="manifest" href="manifest.webmanifest">
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -65,7 +65,7 @@
         <article class="measurement-card">
           <div class="measurement-head"><div><h2>Производственный замер</h2><p>Основной способ — стороны и внутренние углы. Для нестандартной геометрии используйте диагонали.</p></div><div class="mode-switch"><button id="anglesMode" class="active">По углам</button><button id="triangulationMode">Триангуляция</button></div></div>
           <div id="anglesPanel"><div id="angleMeasurements" class="measurements-table"></div><p class="hint">Измените значения и примените замер. Если контур не замыкается, приложение покажет расхождение.</p><button id="applyAngles" class="button primary">Применить размеры и углы</button></div>
-          <div id="triangulationPanel" class="hidden"><p class="triangulation-copy">Триангуляция нужна для колонн, ниш, эркеров, сложных многоугольников и помещений с неточными углами. Укажите диагонали между отмеченными вершинами — они будут проверяться вместе с контуром.</p><div class="diagonal-form"><label>От вершины<select id="diagonalFrom"></select></label><label>До вершины<select id="diagonalTo"></select></label><label>Диагональ, м<input id="diagonalLength" type="number" min="0.01" step="0.01" value="5" /></label><button id="addDiagonal" class="button">Добавить</button></div><div id="diagonalList" class="diagonal-list"></div></div>
+        <div id="triangulationPanel" class="hidden"><p class="triangulation-copy">Триангуляция нужна для колонн, ниш, эркеров, сложных многоугольников и помещений с неточными углами. Укажите диагонали между отмеченными вершинами — они будут проверяться вместе с контуром.</p><div class="diagonal-form"><label>От вершины<select id="diagonalFrom"></select></label><label>До вершины<select id="diagonalTo"></select></label><label>Диагональ, м<input id="diagonalLength" type="number" min="0.01" step="0.01" value="5" /></label><button id="addDiagonal" class="button">Добавить</button><button id="suggestDiagonals" class="button">Подсказать</button></div><div id="diagonalList" class="diagonal-list"></div></div>
           <div class="objects-manager"><div class="objects-heading"><h3>Объекты на плане</h3><span id="objectsSummary"></span></div><div id="planObjectsList" class="plan-objects-list"></div></div>
         </article>
       </section>
@@ -91,14 +91,14 @@
       </section>
 
       <section class="workspace hidden" id="estimateView">
-        <div class="workspace-header"><div><h1>Смета</h1><p>Предварительное коммерческое предложение</p></div><div class="doc-actions"><button id="quoteEconomy" class="button">Эконом</button><button id="quoteStandard" class="button">Стандарт</button><button id="quoteShadow" class="button">Теневой</button><button id="quoteLight" class="button">Световой</button><button id="printEstimate" class="button primary">⎙ Печать / PDF</button></div></div>
+        <div class="workspace-header"><div><h1>Смета</h1><p>Предварительное коммерческое предложение</p></div><div class="doc-actions"><button id="quoteEconomy" class="button">Эконом</button><button id="quoteStandard" class="button">Стандарт</button><button id="quoteShadow" class="button">Теневой</button><button id="quoteLight" class="button">Световой</button><button id="exportQuote" class="button">⇩ КП</button><button id="printEstimate" class="button primary">⎙ Печать / PDF</button></div></div>
         <article class="estimate-paper" id="estimatePaper"><div class="estimate-title"><div><p class="logo-print">ПОТОЛОК PRO</p><h2 id="estimateProject">Квартира · Гостиная</h2></div><p id="estimateDate"></p></div><div class="estimate-client"><strong>Клиент:</strong> <span id="estimateClient">Не указан</span><span id="estimatePhone"></span></div><table><thead><tr><th>Наименование</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr></thead><tbody id="estimateRows"></tbody><tfoot id="estimateTotal"></tfoot></table><p class="estimate-note">Расчёт предварительный. Итоговая стоимость уточняется после контрольного замера.</p></article>
       </section>
 
       <section class="workspace hidden" id="checkView"><div class="workspace-header"><div><h1>Проверка перед производством</h1><p>Контроль геометрии, обязательных данных и комплектации</p></div><button id="runPreflight" class="button primary">Обновить проверку</button></div><article class="preflight-card"><div id="preflightSummary" class="preflight-summary"></div><div id="preflightList" class="preflight-list"></div></article></section>
 
       <section class="workspace hidden" id="measureView">
-        <div class="workspace-header"><div><h1>Замерный лист</h1><p>Документ для передачи контура и контрольных размеров на производство</p></div><div class="doc-actions"><button id="exportDxf" class="button">⇩ Экспорт DXF</button><button id="printMeasure" class="button primary">⎙ Печать / PDF</button></div></div>
+        <div class="workspace-header"><div><h1>Замерный лист</h1><p>Документ для передачи контура и контрольных размеров на производство</p></div><div class="doc-actions"><button id="exportDxf" class="button">⇩ Экспорт DXF</button><button id="exportCsv" class="button">⇩ CSV</button><button id="exportPackage" class="button">⇩ Пакет проекта</button><button id="printMeasure" class="button primary">⎙ Печать / PDF</button></div></div>
         <article class="measure-paper" id="measurePaper">
           <div class="measure-paper-head"><div><p class="logo-print">ПОТОЛОК PRO</p><h2>Замерный лист натяжного потолка</h2></div><div><strong id="measureProjectName"></strong><span id="measureCreated"></span></div></div>
           <div class="measure-meta"><div><span>Клиент</span><strong id="measureClient">Не указан</strong></div><div><span>Адрес</span><strong id="measureAddress">Не указан</strong></div><div><span>Материал</span><strong id="measureMaterial">—</strong></div><div><span>Площадь / периметр</span><strong id="measureMetrics">—</strong></div></div>
