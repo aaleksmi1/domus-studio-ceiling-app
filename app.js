@@ -383,3 +383,26 @@ var roundEditorBase=renderSelectedObjectEditor;renderSelectedObjectEditor=functi
 })();
 // Связываем кнопку остановки окна с активным распознаванием речи.
 (function(){const Native=window.SpeechRecognition||window.webkitSpeechRecognition;if(!Native)return;const Wrapped=function(){const r=new Native();window.activeVoiceRecognition=r;return r};try{if(window.SpeechRecognition)window.SpeechRecognition=Wrapped;if(window.webkitSpeechRecognition)window.webkitSpeechRecognition=Wrapped}catch{}document.addEventListener('click',e=>{if(e.target?.id==='voiceStop'){try{window.activeVoiceRecognition?.stop()}catch{}}},true)})();
+// Основной интерпретатор голосовых команд: помещение, системы, свет и расположение.
+(function(){
+  const button=document.querySelector('#voiceCommandButton');
+  const Speech=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!button||!Speech)return;
+  const value=s=>{const m=String(s||'').replace(',','.').match(/\d+(?:\.\d+)?/);return m?+m[0]:null};
+  const addSegment=(type,x,y,x2,y2,meta={})=>planObjects.push({type,x,y,x2,y2,...meta});
+  const parse=raw=>{
+    const s=String(raw||'').toLowerCase().replace(/ё/g,'е').replace(/метров|метра|метр/g,'м').replace(/\s+/g,' ');
+    const room=s.match(/(?:потол\w*|комнат\w*|помещен\w*)[^\d]*(\d+[,.]?\d*)\s*(?:на|х|×)\s*(\d+[,.]?\d*)/);
+    if(!room)return false;
+    const rw=value(room[1]),rh=value(room[2]);if(!rw||!rh)return false;
+    const wInput=document.querySelector('#rectWidth'),hInput=document.querySelector('#rectHeight');if(wInput)wInput.value=rw;if(hInput)hInput.value=rh;document.querySelector('#applyRectangle')?.click();
+    const r={minX:1,maxX:1+rw,minY:1,maxY:1+rh},cx=1+rw/2,cy=1+rh/2;
+    const track=s.match(/трек[^\d]*(\d+[,.]?\d*)\s*(?:на|х|×)\s*(\d+[,.]?\d*)/);
+    if(track){const tw=value(track[1]),th=value(track[2]),x=cx-tw/2,y=cy-th/2,gid='voice-'+Date.now();addSegment('track',x,y,x+tw,y,gid?{groupId:gid,shape:'square'}:{});addSegment('track',x+tw,y,x+tw,y+th,gid?{groupId:gid,shape:'square'}:{});addSegment('track',x+tw,y+th,x,y+th,gid?{groupId:gid,shape:'square'}:{});addSegment('track',x,y+th,x,y,gid?{groupId:gid,shape:'square'}:{})}
+    const line=s.match(/светов\w*\s+лини\w*[^\d]*(\d+[,.]?\d*)/);if(line){const len=value(line[1]),gap=.25,tw=track?value(track[1]):2,th=track?value(track[2]):2,x=cx-tw/2;addSegment('light',x-gap-len/2,cy-len/2,x-gap-len/2,cy+len/2,{voiceSide:'left'});addSegment('light',x+tw+gap+len/2,cy-len/2,x+tw+gap+len/2,cy+len/2,{voiceSide:'right'})}
+    if(/круг/.test(s))document.querySelector('#addSystemCircle')?.click();if(/овал|эллипс/.test(s))document.querySelector('#addSystemOval')?.click();
+    if(/светильник|точечн|спот/.test(s))planObjects.push({type:'spot',x:cx,y:cy});if(/люстр/.test(s))planObjects.push({type:'chandelier',x:cx,y:cy});if(/карниз/.test(s)){const l=value((s.match(/карниз[^\d]*(\d+[,.]?\d*)/)||[])[1])||2;addSegment('cornice',cx-l/2,1.25,cx+l/2,1.25)}if(/разделител/.test(s)){const l=value((s.match(/разделител[^\d]*(\d+[,.]?\d*)/)||[])[1])||2;addSegment('separator',cx-l/2,cy,cx+l/2,cy)}
+    draw();update();toast('Голосовая команда выполнена');return true;
+  };
+  button.onclick=()=>{const rec=new Speech();window.activeVoiceRecognition=rec;rec.lang='ru-RU';rec.interimResults=false;rec.maxAlternatives=5;const st=document.querySelector('#voiceCommandStatus');st.textContent='Слушаю команду…';rec.onresult=e=>{const text=e.results[0][0].transcript;st.textContent=`Распознано: «${text}»`;if(!parse(text))st.textContent='Команда не распознана. Скажите: «потолок 3 на 4, трек 2 на 2»'};rec.onerror=()=>st.textContent='Не удалось распознать речь. Проверьте микрофон и повторите';rec.onend=()=>{if(st.textContent==='Слушаю команду…')st.textContent='Готов к следующей команде'};rec.start()};
+})();
