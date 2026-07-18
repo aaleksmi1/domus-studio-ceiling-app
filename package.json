@@ -1,0 +1,11 @@
+{
+  "name": "domus-studio-ceiling-app",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "@flatten-js/core": "^1.6.12"
+  }
+}

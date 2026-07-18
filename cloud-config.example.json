@@ -1,0 +1,7 @@
+{
+  "app": "domus-studio-ceiling-app",
+  "apiBaseUrl": "",
+  "authProvider": "",
+  "storage": "",
+  "notes": "Заполнить после выбора сервера. Не помещать секреты в этот файл."
+}
