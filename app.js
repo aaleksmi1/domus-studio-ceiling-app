@@ -1,7 +1,7 @@
 const $ = id => document.getElementById(id);
 const canvas = $('planCanvas'), ctx = canvas.getContext('2d');
 const defaultPoints = [{x:1,y:1},{x:6,y:1},{x:6,y:5},{x:1,y:5}];
-let points = structuredClone(defaultPoints), selected = null, dragging = false, mode = 'select', zoom = 1;
+let points = [], selected = null, dragging = false, mode = 'select', zoom = 1;
 const values = ['canvasPrice','reserve','profilePrice','installPrice','markup','spots','spotPrice','lightLine','lightLinePrice','chandelierPrice','pipePrice','lightPointPrice'];
 const inputIds = [...values,'canvasType','canvasColor','profileType','clientName','clientPhone','clientAddress','clientNote','projectName'];
 function fmt(n, digits=2){return new Intl.NumberFormat('ru-RU',{minimumFractionDigits:digits,maximumFractionDigits:digits}).format(n)}
