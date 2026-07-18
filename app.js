@@ -409,3 +409,13 @@ realignFlatObjects=function(){planObjects.filter(o=>o.x2!==undefined&&!o.voicePl
   };
   button.onclick=()=>{const rec=new Speech();window.activeVoiceRecognition=rec;rec.lang='ru-RU';rec.interimResults=false;rec.maxAlternatives=5;const st=document.querySelector('#voiceCommandStatus');st.textContent='Слушаю команду…';rec.onresult=e=>{const text=e.results[0][0].transcript;st.textContent=`Распознано: «${text}»`;if(!parse(text))st.textContent='Команда не распознана. Скажите: «потолок 3 на 4, трек 2 на 2»'};rec.onerror=()=>st.textContent='Не удалось распознать речь. Проверьте микрофон и повторите';rec.onend=()=>{if(st.textContent==='Слушаю команду…')st.textContent='Готов к следующей команде'};rec.start()};
 })();
+// Свободное перемещение голосовых линий и составных треков без wall-snap.
+(function(){
+  const c=document.querySelector('#planCanvas');if(!c)return;let state=null;
+  const hit=(p,o)=>{const dx=o.x2-o.x,dy=o.y2-o.y,l2=dx*dx+dy*dy||1,t=Math.max(0,Math.min(1,((p.x-o.x)*dx+(p.y-o.y)*dy)/l2)),q={x:o.x+t*dx,y:o.y+t*dy};return Math.hypot(p.x-q.x,p.y-q.y)<.28};
+  c.addEventListener('pointerdown',e=>{if(mode!=='select')return;const p=untransform(canvasPos(e)),o=planObjects.find(x=>x.x2!==undefined&&x.voicePlacement&&hit(p,x));if(!o)return;const group=o.groupId?planObjects.filter(x=>x.groupId===o.groupId):[o];state={p,group};activeFlatLine=o;c.setPointerCapture(e.pointerId);e.preventDefault();e.stopImmediatePropagation()},true);
+  c.addEventListener('pointermove',e=>{if(!state)return;const p=untransform(canvasPos(e)),dx=p.x-state.p.x,dy=p.y-state.p.y;state.group.forEach(o=>{o.x+=dx;o.y+=dy;o.x2+=dx;o.y2+=dy});state.p=p;draw();update();e.preventDefault();e.stopImmediatePropagation()},true);
+  c.addEventListener('pointerup',e=>{if(!state)return;state=null;draw();update();e.preventDefault();e.stopImmediatePropagation()},true);
+})();
+// При распознавании показываем отдельное состояние анализа команды.
+(function(){const status=document.querySelector('#voiceCommandStatus');if(!status)return;new MutationObserver(()=>{const m=document.querySelector('.voice-record-modal .voice-record-state');if(m&&/Распознано/.test(status.textContent))m.textContent='Анализирую команду и строю план…'}).observe(status,{childList:true,subtree:true,characterData:true})})();
