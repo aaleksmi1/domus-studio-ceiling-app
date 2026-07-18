@@ -196,7 +196,7 @@ $('exportProject').onclick=()=>{const blob=new Blob([JSON.stringify(snapshot(),n
 $('importProject').addEventListener('change',e=>{const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{try{apply(JSON.parse(r.result));toast('Проект восстановлен из копии')}catch{toast('Не удалось прочитать файл проекта')}};r.readAsText(file);e.target.value='';});
 window.addEventListener('beforeunload',()=>{try{localStorage.setItem('ceiling-autosave',JSON.stringify(snapshot()))}catch{}});
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){e.preventDefault();$('saveProject').click()}});
-try{const draft=JSON.parse(localStorage.getItem('ceiling-autosave')||'null');if(draft&&draft.points&&draft.inputs&&confirm(`Восстановить последний черновик «${draft.inputs.projectName||'Без названия'}»?`)){apply(draft);toast('Последний черновик восстановлен')}}catch{}
+// Черновик не восстанавливается автоматически при запуске. Пользователь открывает проекты вручную.
 
 // Улучшенное управление проектами: обновление по названию, удаление и версия формата.
 var PROJECTS_KEY='ceiling-projects', PROJECTS_VERSION=2;
