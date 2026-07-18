@@ -420,3 +420,8 @@ realignFlatObjects=function(){planObjects.filter(o=>o.x2!==undefined&&!o.voicePl
 })();
 // При распознавании показываем отдельное состояние анализа команды.
 (function(){const status=document.querySelector('#voiceCommandStatus');if(!status)return;new MutationObserver(()=>{const m=document.querySelector('.voice-record-modal .voice-record-state');if(m&&/Распознано/.test(status.textContent))m.textContent='Анализирую команду и строю план…'}).observe(status,{childList:true,subtree:true,characterData:true})})();
+// Показываем расстояние выбранного элемента до каждой стены, не меняя его координаты.
+(function(){
+  const baseDraw=draw;
+  draw=function(){baseDraw();const o=activeFlatLine;if(!o||o.x2===undefined||points.length<3)return;const c={x:(o.x+o.x2)/2,y:(o.y+o.y2)/2};ctx.save();ctx.font='12px Segoe UI';ctx.textAlign='center';points.forEach((s,i)=>{const e=points[(i+1)%points.length],dx=e.x-s.x,dy=e.y-s.y,l=Math.hypot(dx,dy)||1,t=Math.max(0,Math.min(1,((c.x-s.x)*dx+(c.y-s.y)*dy)/(l*l))),q={x:s.x+t*dx,y:s.y+t*dy},d=Math.hypot(c.x-q.x,c.y-q.y),p=transform({x:(s.x+e.x)/2,y:(s.y+e.y)/2});ctx.fillStyle='#a95726';ctx.fillText(`${vertexName(i)}–${vertexName((i+1)%points.length)}: ${fmt(d)} м`,p.x,p.y-10)});ctx.restore()};
+})();
