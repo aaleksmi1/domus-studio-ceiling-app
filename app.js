@@ -373,3 +373,31 @@ var roundEditorBase=renderSelectedObjectEditor;renderSelectedObjectEditor=functi
     const line=s.match(/СЃРІРµС‚РѕРІ\w*\s+Р»РёРЅРё\w*[^\d]{0,15}(\d+[,.]?\d*)/);if(line){const len=n(line[1]);for(let i=0;i<2;i++){const box=roomBox(),cx=(box.minX+box.maxX)/2,cy=(box.minY+box.maxY)/2,half=Math.min(len/2,(box.maxX-box.minX)/2-.1),off=i?0.8:-0.8;planObjects.push({type:'light',x:cx-half,y:cy+off,x2:cx+half,y2:cy+off});}draw();update();toast('Р”РѕР±Р°РІР»РµРЅС‹ РґРІРµ СЃРІРµС‚РѕРІС‹Рµ Р»РёРЅРёРё');}else if(!room&&!square)voiceExecute(raw);};r.onerror=()=>status.textContent='РќРµ СѓРґР°Р»РѕСЃСЊ СЂР°СЃРїРѕР·РЅР°С‚СЊ СЂРµС‡СЊ. РџРѕРІС‚РѕСЂРёС‚Рµ РєРѕРјР°РЅРґСѓ';r.start()};
 })();
 
+// Составная голосовая команда: помещение + трек + линии по сторонам.
+(function(){
+  const button=document.querySelector('#voiceCommandButton');
+  const Speech=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!button||!Speech)return;
+  const has=(s,word)=>s.indexOf(word)>=0;
+  const number=s=>{const m=String(s||'').replace(',','.').match(/\d+(?:\.\d+)?/);return m?+m[0]:null};
+  const createComposition=(raw)=>{
+    const s=String(raw||'').toLowerCase().replace(/ё/g,'е');
+    const room=s.match(/(?:комнат\w*|помещен\w*)[^\d]*(\d+[,.]?\d*)\s*(?:на|х)\s*(\d+[,.]?\d*)/);
+    if(!room||!has(s,'трек')||!has(s,'светов'))return false;
+    const rw=number(room[1]),rh=number(room[2]);
+    const square=s.match(/трек[^\d]*(\d+[,.]?\d*)\s*(?:на|х)\s*(\d+[,.]?\d*)/);
+    const tw=square?number(square[1]):2,th=square?number(square[2]):2;
+    const lm=s.match(/светов\w*[^\d]*(\d+[,.]?\d*)/),ll=lm?number(lm[1]):2;
+    if(!rw||!rh||!tw||!th||!ll)return false;
+    const rect=document.querySelector('#applyRectangle');document.querySelector('#rectWidth').value=rw;document.querySelector('#rectHeight').value=rh;rect?.click();
+    const cx=1+rw/2,cy=1+rh/2,gid='voice-track-'+Date.now(),x=cx-tw/2,y=cy-th/2;
+    const seg=[{x,y,x2:x+tw,y2:y},{x:x+tw,y,x2:x+tw,y2:y+th},{x:x+tw,y:y+th,x2:x,y2:y+th},{x,y:y+th,x2:x,y}];
+    seg.forEach(o=>planObjects.push({...o,type:'track',groupId:gid,shape:'square'}));
+    const gap=.25,leftX=x-ll/2-gap,rightX=x+tw+gap+ll/2;
+    planObjects.push({type:'light',x:leftX,y:cy-ll/2,x2:leftX,y2:cy+ll/2,voiceGroup:gid+'-left'});
+    planObjects.push({type:'light',x:rightX,y:cy-ll/2,x2:rightX,y2:cy+ll/2,voiceGroup:gid+'-right'});
+    activeFlatLine=planObjects[planObjects.length-1];draw();update();toast('Композиция трека и двух световых линий создана');return true;
+  };
+  const previous=button.onclick;
+  button.onclick=()=>{const r=new Speech();r.lang='ru-RU';r.interimResults=false;r.maxAlternatives=3;const st=document.querySelector('#voiceCommandStatus');st.textContent='Слушаю команду…';r.onresult=e=>{const text=e.results[0][0].transcript;st.textContent=`Распознано: «${text}»`;if(!createComposition(text)&&previous)previous.call(button)};r.onerror=()=>st.textContent='Не удалось распознать речь. Повторите команду';r.start()};
+})();
