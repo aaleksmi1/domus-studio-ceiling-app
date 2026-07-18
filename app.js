@@ -371,3 +371,5 @@ var roundEditorBase=renderSelectedObjectEditor;renderSelectedObjectEditor=functi
     const square=/квадрат\s+трек/.test(s);if(square){document.querySelector('#shapeSystem').value='track';document.querySelector('[data-shape="square"]')?.click();}
     const line=s.match(/светов\w*\s+лини\w*[^\d]{0,15}(\d+[,.]?\d*)/);if(line){const len=n(line[1]);for(let i=0;i<2;i++){const box=roomBox(),cx=(box.minX+box.maxX)/2,cy=(box.minY+box.maxY)/2,half=Math.min(len/2,(box.maxX-box.minX)/2-.1),off=i?0.8:-0.8;planObjects.push({type:'light',x:cx-half,y:cy+off,x2:cx+half,y2:cy+off});}draw();update();toast('Добавлены две световые линии');}else if(!room&&!square)voiceExecute(raw);};r.onerror=()=>status.textContent='Не удалось распознать речь. Повторите команду';r.start()};
 })();
+// Компактная кнопка голосового замерщика в верхней панели рабочего поля.
+(function(){const voice=document.querySelector('.voice-tools'),header=document.querySelector('.workspace-header');if(voice&&header){voice.classList.add('voice-tools-top');header.append(voice)}})();
